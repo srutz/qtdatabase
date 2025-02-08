@@ -24,6 +24,8 @@ qt_add_executable(qtdatabase
     mainwindow.h
     mainwindow.ui
     raiiguard.h
+    settings.h
+    settings.cpp
 )
 
 target_link_libraries(qtdatabase PRIVATE Qt6::Widgets Qt6::Network)

@@ -1,5 +1,6 @@
 
 #include "mainwindow.h"
+#include "settings.h"
 #include "./ui_mainwindow.h"
 #include <QJsonObject>
 #include <QPushButton>
@@ -43,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     buttonsPanelLayout->addStretch();
     buttonsPanelLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     layout->addWidget(buttonsPanel);
+
+    auto settings = Settings::instance()->rootNode();
 }
 
 MainWindow::~MainWindow()
