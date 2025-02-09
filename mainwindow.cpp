@@ -15,8 +15,6 @@
 #include <QSplitter>
 #include <QMargins>
 #include <QFontDatabase>
-#include <future>
-#include <memory>
 
 static void initDatabase() {
     auto settings = Settings::instance();
@@ -79,11 +77,17 @@ MainWindow::MainWindow(QWidget *parent)
             .sql = "SELECT * FROM information_schema.tables",
         });
         dataTable->setConfig(config);
-    }); 
+    });
 
-    connect(dataTable, &DataTable::configChanged, [textBrowser, settings](const DataTableConfig& config) {
+    connect(dataTable, &DataTable::configChanged, this, [textBrowser, settings](const DataTableConfig& config) {
         textBrowser->setPlainText(config.sql);
     });
+
+    connect(ui->aboutAction, &QAction::triggered, this, [this] {
+        QMessageBox::about(this, "About Database", "Perform paged queries on a Database Table into a TableView");
+    });
+
+    
 }
 
 MainWindow::~MainWindow()

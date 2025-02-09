@@ -33,7 +33,7 @@
     <property name="title">
      <string>&amp;Actions</string>
     </property>
-    <addaction name="actionFetchQuotes"/>
+    <addaction name="aboutAction"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuActions"/>
@@ -44,9 +44,9 @@
     <string>E&amp;xit</string>
    </property>
   </action>
-  <action name="actionFetchQuotes">
+  <action name="aboutAction">
    <property name="text">
-    <string>Fetch &amp;Quotes</string>
+    <string>&amp;About</string>
    </property>
   </action>
  </widget>
