@@ -24,6 +24,11 @@
 cmake --preset Desktop-Debug -B build/Desktop-Debug -S .
 ```
 
+```
+#maybe
+cmake -DCMAKE_PREFIX_PATH=/home/sr/Qt/6.8.1/gcc_64 -S . -B build/Desktop-Debug
+``` 
+
 - Building
 
 ```bash

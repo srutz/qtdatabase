@@ -2,29 +2,58 @@
 #include "mainwindow.h"
 #include "settings.h"
 #include "./ui_mainwindow.h"
+#include "datatable.h"
 #include <QJsonObject>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTextBrowser>
 #include <QLabel>
+#include <QTimer>
 #include <QDebug>
-#include <QScrollArea>
+#include <QMessageBox>
 #include <QSplitter>
 #include <QMargins>
 #include <QFontDatabase>
 #include <future>
 #include <memory>
 
+static void initDatabase() {
+    auto settings = Settings::instance();
+
+    auto host = settings->get("database.host");
+    auto name = settings->get("database.name");
+    auto username = settings->get("database.username");
+    auto password = settings->get("database.password");
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
+    db.setHostName(host.value_or("localhost"));
+    db.setDatabaseName(name.value_or("database"));
+    db.setUserName(username.value_or("admin"));
+    db.setPassword(password.value_or("password"));
+    bool ok = db.open();
+    qInfo() << "database connection status " << ok;
+
+    if (!ok) {
+        QMessageBox::critical(nullptr, "Database connection failed", "Could not connect to the database");
+        exit(1);
+    }
+}
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    initDatabase();
     auto layout = new QVBoxLayout(this->centralWidget());
 
-    auto splitter = new QSplitter(Qt::Horizontal, this);
+    auto splitter = new QSplitter(Qt::Vertical, this);
     layout->addWidget(splitter, 1);
+
+    auto dataTable = new DataTable(this);
+    splitter->addWidget(dataTable);
 
     auto textBrowser = new QTextBrowser(this);
     auto fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
@@ -32,11 +61,9 @@ MainWindow::MainWindow(QWidget *parent)
     textBrowser->setFont(fixedFont);
     splitter->addWidget(textBrowser);
 
-    auto dataTable = new QLabel("test");
-    splitter->addWidget(dataTable);
 
     QList<int> sizes;
-    sizes << 200 << 300;
+    sizes << 500 << 200;
     splitter->setSizes(sizes);
 
     auto buttonsPanel = new QWidget(this);
@@ -46,6 +73,12 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(buttonsPanel);
 
     auto settings = Settings::instance()->rootNode();
+
+    QTimer::singleShot(0, [dataTable,this] {
+        DataTableConfig config;
+        config.sql = "SELECT * FROM information_schema.tables";
+        dataTable->setConfig(config);
+    }); 
 }
 
 MainWindow::~MainWindow()

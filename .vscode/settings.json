@@ -3,6 +3,10 @@
         "editor.detectIndentation": false,
         "files.associations": {
             "qnetworkaccessmanager": "cpp",
-            "optional": "cpp"
+            "optional": "cpp",
+            "qsqlquery": "cpp",
+            "memory": "cpp",
+            "qscrollarea": "cpp",
+            "qmessagebox": "cpp"
         }
 }
