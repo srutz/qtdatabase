@@ -5,15 +5,42 @@
 #include <QWidget>
 #include <QSqlQueryModel>
 #include <QSqlQuery>
+#include <QSqlError>
+#include <QLabel>
 #include <vector>
+#include <cmath>
 
 using std::vector;
 
 struct DataTableConfig {
     QString sql;
     vector<QVariant> params;
-    long page = 1;
-    long pageSize = 10;
+    qint64 page = 1;
+    qint64 pageCount = 0;
+    qint64 totalCount = 0;
+    qint64 pageSize = 50;
+
+    void finalize() {
+        // compute total count and then pageCount
+        QString countSql = "SELECT COUNT(*) as C FROM (" + sql + ") AS count_query";
+        QSqlQuery countQuery;
+        countQuery.prepare(countSql);
+        for (auto param : params) {
+            countQuery.addBindValue(param);
+        }
+        auto result = countQuery.exec();
+        if (!result) {
+            qWarning() << "Error executing count query: " << countQuery.lastError().text();
+            return;
+        }
+        if (countQuery.next()) {
+            totalCount = countQuery.value(0).toInt();
+            pageCount = ceil((double)totalCount / pageSize);
+        } else {
+            qWarning() << "Error fetching count query result: " << countQuery.lastError().text();
+            totalCount = 0;
+        }
+    }
 };
 
 class DataTable : public QWidget
@@ -21,7 +48,8 @@ class DataTable : public QWidget
     Q_OBJECT
 
     QTableView *m_tableView;
-    DataTableConfig m_config;   
+    QLabel *m_label;
+    DataTableConfig m_config;
 
 public:
     DataTable(QWidget *parent = nullptr);
@@ -29,6 +57,12 @@ public:
 
     const DataTableConfig& config() const;
     void setConfig(const DataTableConfig& config);
+    void setPage(qint64 page, bool forced = false);
+
+signals:
+    void configChanged(const DataTableConfig& config);
+    void pageChanged(qint64 page);
+
 };
 
 #endif // DATATABLE_H

@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     QList<int> sizes;
-    sizes << 500 << 200;
+    sizes << 500 << 50;
     splitter->setSizes(sizes);
 
     auto buttonsPanel = new QWidget(this);
@@ -75,10 +75,15 @@ MainWindow::MainWindow(QWidget *parent)
     auto settings = Settings::instance()->rootNode();
 
     QTimer::singleShot(0, [dataTable,this] {
-        DataTableConfig config;
-        config.sql = "SELECT * FROM information_schema.tables";
+        DataTableConfig config({
+            .sql = "SELECT * FROM information_schema.tables",
+        });
         dataTable->setConfig(config);
     }); 
+
+    connect(dataTable, &DataTable::configChanged, [textBrowser, settings](const DataTableConfig& config) {
+        textBrowser->setPlainText(config.sql);
+    });
 }
 
 MainWindow::~MainWindow()

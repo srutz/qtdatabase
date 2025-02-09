@@ -26,8 +26,6 @@ qt_add_executable(qtdatabase
     raiiguard.h
     settings.h
     settings.cpp
-    querytablemodel.h
-    querytablemodel.cpp
     datatable.h
     datatable.cpp
 )
