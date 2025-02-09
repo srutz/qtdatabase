@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QTimer::singleShot(0, [dataTable,this] {
         DataTableConfig config({
-            .sql = "SELECT * FROM information_schema.tables",
+            .sql = "SELECT * FROM information_schema.tables ORDER BY 1",
         });
         dataTable->setConfig(config);
     });

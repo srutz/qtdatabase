@@ -103,8 +103,8 @@ void DataTable::handleHeaderClicked(int section) {
         return;
     }
 
-    Qt::SortOrder order = m_tableView->horizontalHeader()->sortIndicatorOrder();
-    QString sortColumn = model->headerData(section, Qt::Horizontal).toString();
+    auto order = m_tableView->horizontalHeader()->sortIndicatorOrder();
+    auto sortColumn = model->headerData(section, Qt::Horizontal).toString();
 
     auto newConfig = DataTableConfig(m_config);
     newConfig.sortColumn = sortColumn;
