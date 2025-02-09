@@ -14,6 +14,7 @@ DataTable::DataTable(QWidget *parent) : QWidget(parent) {
 
     auto mainLayout = new QVBoxLayout(this);
     m_tableView = new QTableView(this);
+    m_tableView->setSortingEnabled(true); // Enable sorting
     mainLayout->addWidget(m_tableView, 1);
 
     auto bottomLayout = new QHBoxLayout();
@@ -40,6 +41,8 @@ DataTable::DataTable(QWidget *parent) : QWidget(parent) {
             setPage(m_config.page + 1);
         }
     });
+
+    connect(m_tableView->horizontalHeader(), &QHeaderView::sectionClicked, this, &DataTable::handleHeaderClicked);
 }
 
 DataTable::~DataTable() {
@@ -66,10 +69,17 @@ void DataTable::setPage(qint64 page, bool forced) {
         return;
     }
     m_config.page = page;
+    QString sortClause;
+    if (!m_config.sortColumn.isEmpty() && m_config.sortOrder != SortOrder::NONE) {
+        sortClause = " ORDER BY " + m_config.sortColumn 
+            + (m_config.sortOrder == SortOrder::ASC ? " ASC" : " DESC")
+            + " ";
+    }
     auto pagedSql = "SELECT * FROM (" 
-        + m_config.sql + ") AS A1 LIMIT " 
-        + QString::number(m_config.pageSize) + " OFFSET " 
-        + QString::number((page - 1) * m_config.pageSize);
+        + m_config.sql + ") AS A1 "
+        + sortClause
+        + " LIMIT " + QString::number(m_config.pageSize) 
+        + " OFFSET " + QString::number((page - 1) * m_config.pageSize);
 
     QSqlQuery query;
     query.prepare(pagedSql);
@@ -85,4 +95,19 @@ void DataTable::setPage(qint64 page, bool forced) {
     m_label->setText("Page: " + QString::number(m_config.page) + " of " + QString::number(m_config.pageCount));
     emit pageChanged(m_config.page);
     //m_tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+}
+
+void DataTable::handleHeaderClicked(int section) {
+    auto model = dynamic_cast<QSqlQueryModel*>(m_tableView->model());
+    if (!model) {
+        return;
+    }
+
+    Qt::SortOrder order = m_tableView->horizontalHeader()->sortIndicatorOrder();
+    QString sortColumn = model->headerData(section, Qt::Horizontal).toString();
+
+    auto newConfig = DataTableConfig(m_config);
+    newConfig.sortColumn = sortColumn;
+    newConfig.sortOrder = order == Qt::AscendingOrder ? SortOrder::ASC : SortOrder::DESC;
+    setConfig(newConfig);
 }

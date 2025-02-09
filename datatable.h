@@ -12,6 +12,8 @@
 
 using std::vector;
 
+enum SortOrder { NONE = 0, ASC = 1, DESC = 2 };   
+
 struct DataTableConfig {
     QString sql;
     vector<QVariant> params;
@@ -19,7 +21,9 @@ struct DataTableConfig {
     qint64 pageCount = 0;
     qint64 totalCount = 0;
     qint64 pageSize = 50;
-
+    SortOrder sortOrder = SortOrder::NONE;
+    QString sortColumn;
+    
     void finalize() {
         // compute total count and then pageCount
         QString countSql = "SELECT COUNT(*) as C FROM (" + sql + ") AS count_query";
@@ -58,6 +62,9 @@ public:
     const DataTableConfig& config() const;
     void setConfig(const DataTableConfig& config);
     void setPage(qint64 page, bool forced = false);
+
+private slots:
+    void handleHeaderClicked(int section);
 
 signals:
     void configChanged(const DataTableConfig& config);
