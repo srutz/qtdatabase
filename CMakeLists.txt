@@ -28,6 +28,7 @@ qt_add_executable(qtdatabase
     settings.cpp
     datatable.h
     datatable.cpp
+    databaseutil.h
 )
 
 target_link_libraries(qtdatabase PRIVATE Qt6::Widgets Qt6::Network Qt6::Sql)
